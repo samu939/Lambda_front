@@ -1,0 +1,77 @@
+<header class="bg-gradient-purple text-white" [hidden]="isLoadingAddCategory">
+    <div class="p-6 flex items-center gap-5">
+        <div
+            class="flex items-end dark:text-gray-500"
+            [routerLink]="['/admin']"
+        >
+            <span class="fas fa-chevron-left"></span>
+        </div>
+
+        <div class=""></div>
+        <div class="font-medium text-lg">Create Category</div>
+        <div class=""></div>
+    </div>
+</header>
+
+<div class="animate__animated animate__fadeIn" [hidden]="isLoadingAddCategory">
+    <section class="mx-4 py-7">
+        <form [formGroup]="addCategoryForm" (ngSubmit)="showData()">
+            <div class="gap-2 grid dark:text-custom-light">
+                <p class="font-medium text-lg">Category Name</p>
+
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Name</mat-label>
+                    <input
+                        matInput
+                        formControlName="name"
+                        placeholder="Fisico"
+                    />
+                </mat-form-field>
+
+                <p class="font-medium text-lg">Category Icon</p>
+
+                <div class="bg-slate-100 shadow-md p-2 w-full">
+                    <input
+                        type="file"
+                        class="font-medium text-xl text-gray-500 bg-transparent border-none w-full focus:outline-none"
+                        placeholder="Subir Icono"
+                        formControlName="icon"
+                        (change)="loadImage($event)"
+                    />
+                </div>
+            </div>
+
+            <div class="mx-3 py-3"></div>
+
+            <div class="w-full flex justify-center gap-3">
+                <button
+                    [routerLink]="['/admin']"
+                    class="btn w-1/2 h-16 lg:w-36 align-middle dark:bg-custom-light text-custom-light dark:text-custom-dark-purple rounded-[50px]"
+                    [ngClass]="{
+                        'bg-custom-gradient-purple':
+                            !darkModeService.isDarkMode(),
+                    }"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    (submit)="showData()"
+                    class="btn w-1/2 h-16 lg:w-36 align-middle dark:bg-custom-light text-custom-light dark:text-custom-dark-purple rounded-[50px]"
+                    [ngClass]="{
+                        'bg-custom-gradient-purple':
+                            !darkModeService.isDarkMode(),
+                    }"
+                >
+                    Confirmar
+                </button>
+            </div>
+        </form>
+
+        <div class="mx-2 py-2"></div>
+    </section>
+</div>
+
+@if (isLoadingAddCategory) {
+    <app-loader></app-loader>
+}

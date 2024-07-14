@@ -3,8 +3,7 @@ export class Result<T> {
   private _error: Error;
   private _isError: boolean;
 
-  private constructor(isError: boolean,
-    value?: T, _error?: Error) {
+  private constructor(isError: boolean, value?: T, _error?: Error) {
     this.value = value!;
     this._error = _error!;
     this._isError = isError;
@@ -25,7 +24,7 @@ export class Result<T> {
   }
 
   static makeResult<T>(value: T) {
-    return new Result<T>(false, value);
+    return new Result<T>(false, value, undefined);
   }
 
   static makeError<T>(error: Error) {

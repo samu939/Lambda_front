@@ -20,19 +20,18 @@ import { PopupInfoModalService } from "../../../shared/services/popup-info-modal
 import { FileService } from "../../../shared/services/file/file.service";
 import { Category } from "../../../../core/categories/domain/category.model";
 import { Trainer } from "../../../../core/trainer/domain/trainer.model";
-import { AddBlogForm } from "../../interfaces/add-blog-form-interface";
-import { AddBlogAdminDto } from "../../../../core/admin/application/interfaces/dto/add-blog-dto";
-import { AddBlogAdminUseCase } from "../../../../core/admin/application/add-blog-use-case.service";
 import { AuthLocalStorageService } from "../../../../core/shared/infraestructure/local-storage/auth-local-storage.service";
 import { Result } from "../../../../common/helpers/Result";
 import { TrainerGetManyProvider } from "../../../../core/trainer/infrastructure/providers/trainer-get-many.service";
 import { LoaderComponent } from "../../../auth/components/loader/loader.component";
-import { AddBlogApiProvider } from "../../../../core/admin/infraestructure/providers/AddBlogApiService.service";
+import { AddCategoryApiProvider } from "../../../../core/admin/infraestructure/providers/AddCategoryApiService.service";
+import { AddCategoryForm } from "../../interfaces/add-category-form-interface";
+import { AddCategoryAdminDto } from "../../../../core/admin/application/interfaces/dto/add-category-dto";
 
 @Component({
-  selector: "add-blog-page",
-  templateUrl: "./add-blog.component.html",
-  styleUrl: "./add-blog.component.css",
+  selector: "add-category-page",
+  templateUrl: "./add-category.component.html",
+  styleUrl: "./add-category.component.css",
   standalone: true,
   imports: [
     RouterLink,
@@ -46,50 +45,40 @@ import { AddBlogApiProvider } from "../../../../core/admin/infraestructure/provi
     LoaderComponent,
   ],
 })
-export class AddBlogPageComponent {
+export class AddCategoryPageComponent {
   private categoryUseCaseService = inject(CategoyUseCaseProvider);
   private fb = inject(FormBuilder);
   public validatorService = inject(ValidatorService);
   public darkModeService = inject(DarkModeService);
   private popupService = inject(PopupInfoModalService);
   private fileService = inject(FileService);
-  private trainerMany = inject(TrainerGetManyProvider);
-  public BlogCreatedSucsessfully = "The blog was created sucessfully";
-  public BlogCreatedError =
-    "Something went wrong creating the blog, please try again";
+  public CategoryCreatedSucsessfully = "The Category was created sucessfully";
+  public CategoryCreatedError =
+    "Something went wrong creating the Category, please try again";
   public errorUploadingImage = "Error uploading the image";
 
-  public isLoadingAddCourse = false;
-  public categories: Category[] = [];
-  public trainers: Trainer[] = [];
-  public images: string[] = [];
+  public isLoadingAddCategory = false;
+  public icon: string[] = [];
 
-  public addBlogForm: FormGroup<AddBlogForm> = this.fb.group<AddBlogForm>({
-    title: new FormControl(null, { validators: [Validators.required] }),
-    content: new FormControl(null, { validators: [Validators.required] }),
-    category: new FormControl(null, { validators: [Validators.required] }),
-    trainer: new FormControl(null, { validators: [Validators.required] }),
-    tags: new FormControl(null, { validators: [Validators.required] }),
-    images: new FormControl(null, { validators: [Validators.required] }),
-  });
+  public addCategoryForm: FormGroup<AddCategoryForm> =
+    this.fb.group<AddCategoryForm>({
+      name: new FormControl(null, { validators: [Validators.required] }),
+      icon: new FormControl(null, { validators: [Validators.required] }),
+    });
 
   showData() {
-    this.isLoadingAddCourse = true;
-    if (this.addBlogForm.valid) {
-      let formData = this.addBlogForm.value;
-      let sendData: AddBlogAdminDto = {
-        trainerId: formData.trainer!.id,
-        title: formData.title!,
-        body: formData.content!,
-        categoryId: formData.category!.id,
-        tags: formData.tags!,
-        images: this.images,
+    this.isLoadingAddCategory = true;
+    if (this.addCategoryForm.valid) {
+      let formData = this.addCategoryForm.value;
+      let sendData: AddCategoryAdminDto = {
+        name: formData.name!,
+        icon: this.icon[0],
       };
-      this.sendAddBlog(sendData);
+      this.sendAddCategory(sendData);
     }
   }
 
-  private adminUseCase = inject(AddBlogApiProvider);
+  private adminUseCase = inject(AddCategoryApiProvider);
 
   loadImage(event: any): void {
     let files: any = [];
@@ -106,8 +95,8 @@ export class AddBlogPageComponent {
       });
     });
 
-    this.images = imagesBase64;
-    this.addBlogForm.get("images")?.setValue(cleanedFiles);
+    this.icon = imagesBase64;
+    this.addCategoryForm.get("icon")?.setValue(cleanedFiles[0]);
 
     //if (!file) console.log('file nulo')
     //return this.popupService.displayErrorModal(this.errorUploadingUserImage)}
@@ -115,33 +104,18 @@ export class AddBlogPageComponent {
     //const isValidImageExtension = this.validatorService.vali.test(file.name);
   }
 
-  private sendAddBlog(data: AddBlogAdminDto) {
+  private sendAddCategory(data: AddCategoryAdminDto) {
     this.adminUseCase.usecase.execute(data).subscribe({
       next: (value) => {
-        this.popupService.displayInfoModal(this.BlogCreatedSucsessfully);
-        this.isLoadingAddCourse = false;
+        this.popupService.displayInfoModal(this.CategoryCreatedSucsessfully);
+        this.isLoadingAddCategory = false;
       },
       error: (error: Result<Error>) => {
-        this.isLoadingAddCourse = false;
+        this.isLoadingAddCategory = false;
         this.popupService.displayErrorModal(error.getError().message);
       },
     });
   }
 
-  constructor() {
-    this.categoryUseCaseService.usecase.getByParams("").subscribe({
-      next: (value) => {
-        this.categories = value;
-      },
-    });
-    this.trainerMany.usecase.execute("?page=1&perPage=10").subscribe({
-      next: (value) => {
-        if (!value.isError()) this.trainers = value.getValue();
-        else this.popupService.displayErrorModal(value.getError().message);
-      },
-      error: (error: Result<Error>) => {
-        this.popupService.displayErrorModal(error.getError().message);
-      },
-    });
-  }
+  constructor() {}
 }
